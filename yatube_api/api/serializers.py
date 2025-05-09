@@ -55,12 +55,12 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = ('id', 'text', 'author', 'image', 'group', 'pub_date')
         read_only_fields = ('author', 'pub_date')
-        
+
     def validate_text(self, value):
         if not value:
-            raise serializers.ValidationError(
-                'Текст публикации не может быть пустым'
-                )
+            raise serializers.ValidationError({
+                'text': 'Текст публикации не может быть пустым'
+            })
         return value
 
     def validate_group(self, value):
@@ -72,7 +72,7 @@ class PostSerializer(serializers.ModelSerializer):
                 return value
             except Group.DoesNotExist:
                 raise serializers.ValidationError(
-                    "Указанной группы не существует"
+                    {"group": "Указанной группы не существует"}
                     )
         return value
 
@@ -83,9 +83,9 @@ class PostSerializer(serializers.ModelSerializer):
                 group = Group.objects.get(id=group_id)
                 validated_data['group'] = group
             except Group.DoesNotExist:
-                raise serializers.ValidationError({
-                    "group": "Указанной группы не существует"
-                    })
+                raise serializers.ValidationError(
+                    {"group": "Specified group does not exist"}
+                    )
         return Post.objects.create(**validated_data)
 
 
