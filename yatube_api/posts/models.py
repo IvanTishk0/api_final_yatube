@@ -27,7 +27,7 @@ class Post(models.Model):
         verbose_name='Автор'
     )
     image = models.ImageField(
-        'Изображение', upload_to='posts/images', 
+        'Изображение', upload_to='posts/images',
         null=True, blank=True, default=None
     )
     group = models.ForeignKey(

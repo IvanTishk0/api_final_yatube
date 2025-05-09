@@ -3,7 +3,8 @@ from rest_framework.validators import UniqueTogetherValidator
 import base64
 from django.core.files.base import ContentFile
 from posts.models import Comment, Post, Group, User, Follow
-    
+
+
 class Base64ImageField(serializers.ImageField):
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith('data:image'):
@@ -13,6 +14,7 @@ class Base64ImageField(serializers.ImageField):
             data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
 
         return super().to_internal_value(data)
+
 
 class UserSerializer(serializers.ModelSerializer):
     posts = serializers.PrimaryKeyRelatedField(
@@ -42,6 +44,7 @@ class GroupSerializer(serializers.ModelSerializer):
             'description'
         )
 
+
 class PostSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True,
@@ -55,9 +58,11 @@ class PostSerializer(serializers.ModelSerializer):
         
     def validate_text(self, value):
         if not value:
-            raise serializers.ValidationError('Текст публикации не может быть пустым')
+            raise serializers.ValidationError(
+                'Текст публикации не может быть пустым'
+                )
         return value
-        
+
     def validate_group(self, value):
         if value is not None:
             if isinstance(value, Group):
@@ -66,19 +71,23 @@ class PostSerializer(serializers.ModelSerializer):
                 Group.objects.get(id=value)
                 return value
             except Group.DoesNotExist:
-                raise serializers.ValidationError("Указанной группы не существует")
+                raise serializers.ValidationError(
+                    "Указанной группы не существует"
+                    )
         return value
 
     def create(self, validated_data):
-        if 'group' in validated_data and isinstance(validated_data['group'], (int, str)):
+        if 'group' in validated_data and validated_data['group'] is not None:
             group_id = validated_data['group']
             try:
                 group = Group.objects.get(id=group_id)
                 validated_data['group'] = group
             except Group.DoesNotExist:
-                raise serializers.ValidationError({"group": "Указанной группы не существует"})
-        
+                raise serializers.ValidationError({
+                    "group": "Указанной группы не существует"
+                    })
         return Post.objects.create(**validated_data)
+
 
 class CommentSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
@@ -103,6 +112,7 @@ class CommentSerializer(serializers.ModelSerializer):
             'post',
             'created'
         )
+
 
 class FollowSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(
