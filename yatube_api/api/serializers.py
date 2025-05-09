@@ -84,7 +84,7 @@ class PostSerializer(serializers.ModelSerializer):
                 validated_data['group'] = group
             except Group.DoesNotExist:
                 raise serializers.ValidationError({
-                    'group': 'Specified group does not exist'
+                    'group': 'Указанной группы не существует'
                 })
         return Post.objects.create(**validated_data)
 
