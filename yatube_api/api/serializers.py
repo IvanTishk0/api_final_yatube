@@ -114,13 +114,22 @@ class CommentSerializer(serializers.ModelSerializer):
         )
 
 
+class CustomSlugRelatedField(serializers.SlugRelatedField):
+    def to_internal_value(self, data):
+        try:
+            return super().to_internal_value(data)
+        except serializers.ValidationError:
+            raise serializers.ValidationError(
+                f'Пользователь с username {data} не существует'
+            )
+
+
 class FollowSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(
-        read_only=True,
         slug_field='username',
         default=serializers.CurrentUserDefault()
     )
-    following = serializers.SlugRelatedField(
+    following = CustomSlugRelatedField(
         queryset=User.objects.all(),
         slug_field='username'
     )
